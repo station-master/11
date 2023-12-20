@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11班文件上传器!</title>
+    <style>
+        .wj{
+            position: absolute;
+            width: 70%;
+            height: 20%;
+            background-color: #7c0a21;
+            left: 0px;
+            right: 0px;
+            margin: auto;
+            top:5%;
+            box-shadow: 0 5.7565932872px 5px #7c0a21;
+        color: white;
+        border: none;
+        font-size: large;
+        }
+        #wjlb{
+            position: absolute;
+            width: 70%;
+            height: 15%;
+            background-color: white;
+            left: 0px;
+            right: 0px;
+            margin: auto;
+            top:30%;
+            box-shadow: 0 5.7565932872px 5px #7c0a21;
+
+        }
+        .mz{
+            position: absolute;
+            width: 70%;
+            height: 10%;
+            box-shadow: 0 5.7565932872px 5px #7c0a21;
+            left: 0px;
+            right: 0px;
+            margin: auto;
+            top:50%;
+            font-size: large;
+            border: none;
+        }
+        .an{
+            position: absolute;
+            width: 70%;
+            height: 10%;
+            background-color: #7c0a21;
+            left: 0px;
+            right: 0px;
+            margin: auto;
+            top:65%;
+            box-shadow: 0 5.7565932872px 5px #7c0a21;
+            color: white;
+            font-size: large;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="document.getElementById('inputImage').click()" class="wj">
+    点击上传文件<br>
+    多次点击可选择多个文件
+    </button>
+    <input type="file" id="inputImage" style="display: none;" multiple />
+    <div id="wjlb"></div>
+    <input id="name" class="mz" placeholder="请在此输入你的名字"/>
+    <button class="an" onclick="submit()">提交文件</button>
+    <div id="zhezhao" style="display: none;position: fixed;width: 100%;height: 100%;top: 0px;left: 0px;background-color: white;font-size: 80px;text-align: center;line-height: 120px;">
+    文件上传中
+    <br>
+    请不要离开
+    </div>
+    <div style="position: fixed;width: 100%;height: 10%;bottom:  0px;left: 0px;background-color: white;font-size: large;text-align: center;">Powered    by    lzy</div>
+    <script>
+        var tupian=[]
+        var fasongliebiao=[]
+        var t=''
+
+var zongi=0
+
+        const inputImage = document.getElementById('inputImage');
+        inputImage.addEventListener('change', function(event) {
+            var t=event.target.files;
+            for (let i = 0; i < t.length; i++) {
+                const file = t[i];
+                //file.name
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                console.log(base64); // 输出图片的Base64编码
+                tupian.push(file.name+'·'+base64)
+
+                document.getElementById('wjlb').innerHTML=document.getElementById('wjlb').innerHTML+file.name+'<br>'
+            };
+            reader.readAsDataURL(file);
+            }
+
+        });
+        // WebSocket构造函数，创建WebSocket对象
+let ws = new WebSocket('ws://123.60.208.70:8088')
+
+
+
+// 从服务器接受到信息时的回调函数
+ws.onmessage = function (e) {
+  console.log('收到服务器响应', e.data)
+  if (e.data=='next') {
+    ffabt()
+  }else if (e.data=='ok') {
+    document.getElementById('zhezhao').innerHTML='文件上传成功！'
+    
+
+
+}
+};
+function ffabt() {
+    console.log(zongi);
+    if (zongi==-1) {
+        return
+    }
+    if (fasongliebiao.length-1<zongi) {
+        setTimeout(() => {
+            ws.send('cwj'+'endfile|'+t)
+        }, 500);
+        
+        zongi=-1
+        return
+    }
+    ws.send('cwj'+'cfile|'+t+'|'+fasongliebiao[zongi])
+    
+    zongi++
+}
+function submit() {
+     t=document.getElementById("name").value+Math.floor(Math.random()*100000)
+
+   
+    if (document.getElementById("name").value) {
+if (tupian.length) {
+    
+}else{
+    return
+}
+document.getElementById('zhezhao').style.display='block'
+        ws.send('cwj'+'onfile|'+t)
+        setTimeout(() => {
+            zongi=0
+            for (let i = 0; i < tupian.length; i++) {
+        const element = tupian[i];
+        for (let t = 0; t < element.length; t=t+60000) {
+            if (element.length-t<60000) {
+                var fasongzhe=  element.substring(t,element.length)
+            }else{
+                var fasongzhe=  element.substring(t,t+60000)
+            }
+            fasongliebiao.push(i+'|'+fasongzhe)
+            //ws.send('cwj'+'onfile|'+t+'|'+i+'|'+fasongzhe)
+        }
+    }
+
+    ffabt()
+    
+        }, 100);
+
+                }else{
+                    alert('请输入名字')
+                }
+}
+
+    </script>
+</body>
+</html>
